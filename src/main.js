@@ -9,6 +9,8 @@ const fetchBtn = document.querySelector('.btn');
 const gallery = document.querySelector('.gallery');
 const loader = document.querySelector('.spinner');
 
+const newGallery = new SimpleLightbox('.gallery a');
+
 const API_KEY = '41458722-788aa599ff2a579d31eb49587';
 
 const url = new URL('https://pixabay.com/api/');
@@ -17,11 +19,14 @@ url.searchParams.append('image_type', 'photo');
 url.searchParams.append('orientation', 'horizontal');
 url.searchParams.append('safesearch', 'true');
 
+let tegPhoto;
+
 input.addEventListener('input', event => {
-  url.searchParams.append('q', `${event.target.value}`);
+  tegPhoto = event.target.value;
 });
 
 const fetchPhotos = () => {
+  url.searchParams.append('q', `${tegPhoto}`);
   return fetch(url).then(response => {
     if (!response.ok) {
       throw new Error(response.status);
@@ -30,13 +35,11 @@ const fetchPhotos = () => {
   });
 };
 
-const newGallery = new SimpleLightbox('.gallery a');
-
 form.addEventListener('submit', event => {
   event.preventDefault();
   loader.classList.add('loader');
 
-  fetchPhotos(url)
+  fetchPhotos()
     .then(photos => {
       if (photos.total === 0) {
         iziToast.error({
@@ -58,6 +61,7 @@ form.addEventListener('submit', event => {
 // ---------------------------------------------------------
 
 function addPic(arr) {
+  gallery.innerHTML = '';
   gallery.insertAdjacentHTML(
     'afterbegin',
     arr.reduce(
@@ -67,7 +71,7 @@ function addPic(arr) {
       ) =>
         html +
         `<li class="gallery-item">
-          <a class="imgLink" href="${largeImageURL}">
+          <a href="${largeImageURL}">
           
             <div class="pic-item">
               <img src="${webformatURL}" alt="photo">
