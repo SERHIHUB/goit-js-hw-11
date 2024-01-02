@@ -19,14 +19,15 @@ url.searchParams.append('image_type', 'photo');
 url.searchParams.append('orientation', 'horizontal');
 url.searchParams.append('safesearch', 'true');
 
-let tegPhoto;
+let tagPhoto;
 
 input.addEventListener('input', event => {
-  tegPhoto = event.target.value;
+  tagPhoto = event.target.value;
 });
 
 const fetchPhotos = () => {
-  url.searchParams.append('q', `${tegPhoto}`);
+  url.searchParams.delete('q');
+  url.searchParams.append('q', `${tagPhoto}`);
   return fetch(url).then(response => {
     if (!response.ok) {
       throw new Error(response.status);
@@ -38,6 +39,7 @@ const fetchPhotos = () => {
 form.addEventListener('submit', event => {
   event.preventDefault();
   loader.classList.add('loader');
+  gallery.innerHTML = '';
 
   fetchPhotos()
     .then(photos => {
@@ -51,7 +53,13 @@ form.addEventListener('submit', event => {
       addPic(photos.hits);
       newGallery.refresh();
     })
-    .catch(error => console.log(error))
+    .catch(error => {
+      iziToast.error({
+        message:
+          'Sorry, there are no images matching your search query. Please try again!',
+        position: 'topRight',
+      });
+    })
     .finally(() => {
       form.reset();
       loader.classList.remove('loader');
@@ -61,7 +69,6 @@ form.addEventListener('submit', event => {
 // ---------------------------------------------------------
 
 function addPic(arr) {
-  gallery.innerHTML = '';
   gallery.insertAdjacentHTML(
     'afterbegin',
     arr.reduce(
